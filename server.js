@@ -1,12 +1,18 @@
-import express from "express"; // Corrected the import statement
-import connectDatabase from "./config/db";
-import { check, validationResult } from "express-validator";
+const express = require("express");
+const connectDatabase = require("./config/db.js");
+const { check, validationResult } = require("express-validator");
+const cors = require("cors");
 
 const app = express();
 
 connectDatabase();
 
 app.use(express.json({ extended: false }));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
 app.get("/", (req, res) => {
   res.send("http get request sent to root api endpoint");
@@ -26,12 +32,13 @@ app.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
-    } else {
-      return res.send(req.body);
     }
-    console.log(req.body);
+
+    console.log(req.body); // This will now be executed if there are no errors
+
     res.send(req.body);
   }
 );
 
-app.listen(3000, () => console.log("Express server running on port 3000"));
+const port = 5000;
+app.listen(port, () => console.log(`Express server running on port ${port}`));
