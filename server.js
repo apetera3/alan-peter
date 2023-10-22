@@ -1,5 +1,5 @@
-import express from "express"; // Corrected the import statement
-import connectDatabase from "./config/db";
+import express from "express";
+import connectDatabase from "./config/db.js";
 import { check, validationResult } from "express-validator";
 
 const app = express();
