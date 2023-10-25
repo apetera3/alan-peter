@@ -1,3 +1,4 @@
 {
-  "jwtsecret": "theforcebewithyou"
+  "mongoURI": "mongodb+srv://alan_peter7:qyMru3IjbVJMi89o@cluster0.yzjqt5l.mongodb.net/?retryWrites=true&w=majority&appName=AtlasApp",
+  "jwtSecret": "maytheforcebewithyou"
 }
