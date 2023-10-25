@@ -1,19 +1,19 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import config from "config";
+
+const db = config.get("mongoURI");
 
 const connectDatabase = async () => {
   try {
-    await mongoose.connect(
-      "mongodb+srv://alan_peter7:qyMru3IjbVJMi89o@cluster0.yzjqt5l.mongodb.net/?retryWrites=true&w=majority&appName=AtlasApp",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
-    );
-    console.log("MongoDB connected");
+    await mongoose.connect(db, {
+      useUnifiedTopology: true,
+    });
+    console.log("Connected to MongoDB");
   } catch (error) {
     console.error(error.message);
+
     process.exit(1);
   }
 };
 
-module.exports = connectDatabase;
+export default connectDatabase;
