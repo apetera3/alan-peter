@@ -1,12 +1,13 @@
-const express = require("express");
-const connectDatabase = require("./config/db.js");
-const { check, validationResult } = require("express-validator");
-const cors = require("cors");
-const User = require("./models/User.js");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import express from "express";
+import connectDatabase from "./config/db";
+import { check, validationResult } from "express-validator";
+import cors from "cors";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import config from "config";
+import User from "./models/User";
+
 const app = express();
-const config = require("config");
 
 connectDatabase();
 
@@ -17,10 +18,21 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.send("http get request sent to root api endpoint");
-});
+// API endpoints
+/**
+ * @route GET /
+ * @desc Test endpoint
+ */
+app.get("/", (req, res) =>
+  res.send("http get request sent to root api endpoint")
+);
 
+app.get("/api/", (req, res) => res.send("http get request sent to api"));
+
+/**
+ * @route POST api/users
+ * @desc Register user
+ */
 app.post(
   "/api/users",
   [
@@ -35,47 +47,45 @@ app.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
-    }
-
-    const { name, email, password } = req.body;
-
-    try {
-      let user = await User.findOne({ email: email });
-      if (user) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "User already exists" }] });
-      }
-
-      user = new User({
-        name: name,
-        email: email,
-        password: password,
-      });
-
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
-
-      await user.save();
-
-      const payload = {
-        user: {
-          id: user.id,
-        },
-      };
-
-      jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        { expiresIn: "10hr" },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token: token });
+    } else {
+      const { name, email, password } = req.body;
+      try {
+        let user = await User.findOne({ email: email });
+        if (user) {
+          return res
+            .status(400)
+            .json({ errors: [{ msg: "User already exists" }] });
         }
-      );
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).send("Server error");
+
+        user = new User({
+          name: name,
+          email: email,
+          password: password,
+        });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+
+        await user.save();
+
+        const payload = {
+          user: {
+            id: user.id,
+          },
+        };
+
+        jwt.sign(
+          payload,
+          config.get("jwtSecret"),
+          { expiresIn: "10hr" },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token: token });
+          }
+        );
+      } catch (error) {
+        res.status(500).send("Server error");
+      }
     }
   }
 );
